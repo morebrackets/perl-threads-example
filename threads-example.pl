@@ -4,14 +4,11 @@ use threads(
 	# 'stack_size' => 32*4096 # Increase per-thread memory-limit
 );
 use Net::DNS;
-my $res = Net::DNS::Resolver->new;
-$res->udp_timeout(3);
-$res->tcp_timeout(3);
 
 $|++; # flush output
 
 my $numThreads = 200; # 1x-5x number of cores on *nix. Less on windows.
-my $numLookupsPerThread = 20;
+my $numLookupsPerThread = 10;
 my $hostlength = 3;
 my @letters = split(//,'qwertyuiopasdfghjklzxcvbnm');
 my $lLength = $#letters;
@@ -48,6 +45,10 @@ sub findip {
 	local $SIG{KILL} = sub { threads->exit; }; #### IMPORTANT
 	print "* t$id: begin\n";
 
+	my $res = Net::DNS::Resolver->new;
+	$res->udp_timeout(3);
+	$res->tcp_timeout(3);
+
 	for my $n (1..$numLookupsPerThread){
 		my $dom = &randStr($hostlength) . '.com';
 		my $ip = 'na';
@@ -75,6 +76,7 @@ sub findip {
 	# Detach (signal to controller that thread work has been completed)
 	threads->detach();
 }
+
 
 # Random string generator
 sub randStr {
