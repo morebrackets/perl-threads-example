@@ -3,11 +3,15 @@ use threads(
 	'exit' => 'threads_only', # Prevent whole script from dying if a thread dies
 	# 'stack_size' => 32*4096 # Increase per-thread memory-limit
 );
-use Socket; # for gethostbyname
+use Net::DNS;
+my $res = Net::DNS::Resolver->new;
+$res->udp_timeout(3);
+$res->tcp_timeout(3);
+
 $|++; # flush output
 
-my $numThreads = 24; # 1x-5x number of cores on *nix. Less on windows.
-my $numLookupsPerThread = 20;
+my $numThreads = 200; # 1x-5x number of cores on *nix. Less on windows.
+my $numLookupsPerThread = 100;
 my $hostlength = 3;
 my @letters = split(//,'qwertyuiopasdfghjklzxcvbnm');
 my $lLength = $#letters;
@@ -50,9 +54,18 @@ sub findip {
 
 		# lookup
 		my $begin = time;
-		my $packed_ip = gethostbyname($dom);
 
-	    $ip = inet_ntoa($packed_ip) if (defined $packed_ip);
+	    my $reply = $res->search("www.example.com", "A");
+ 
+		if ($reply) {
+			$ip = '';
+		    foreach my $rr ($reply->answer) {
+		        $ip .= $rr->address, ", " if $rr->can("address");
+		    }
+		} else {
+		    $ip = $res->errorstring;
+		}
+
 
 	    print "t$id\: $dom = $ip (".(time - $begin)." sec)\n";
 	}
