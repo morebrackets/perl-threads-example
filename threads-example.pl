@@ -60,7 +60,7 @@ sub findip {
 		if ($reply) {
 			$ip = '';
 		    foreach my $rr ($reply->answer) {
-		        $ip .= $rr->address, ", " if $rr->can("address");
+		        $ip .= $rr->address . ', ' if $rr->can('address');
 		    }
 		} else {
 		    $ip = $res->errorstring;
