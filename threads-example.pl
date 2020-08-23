@@ -11,7 +11,7 @@ $res->tcp_timeout(3);
 $|++; # flush output
 
 my $numThreads = 200; # 1x-5x number of cores on *nix. Less on windows.
-my $numLookupsPerThread = 100;
+my $numLookupsPerThread = 20;
 my $hostlength = 3;
 my @letters = split(//,'qwertyuiopasdfghjklzxcvbnm');
 my $lLength = $#letters;
@@ -55,7 +55,7 @@ sub findip {
 		# lookup
 		my $begin = time;
 
-	    my $reply = $res->search("www.example.com", "A");
+	    my $reply = $res->search($dom, "A");
  
 		if ($reply) {
 			$ip = '';
